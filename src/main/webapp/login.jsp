@@ -1,3 +1,8 @@
+<%@page import="java.util.List"%>
+<%@page import="com.course.zumba.constant.Query"%>
+<%@page import="com.course.zumba.service.GenericServiceImpl"%>
+<%@page import="com.course.zumba.model.User"%>
+<%@page import="com.course.zumba.service.GenericService"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <!DOCTYPE html>
@@ -38,37 +43,83 @@
 </head>
 <body class="bg-light">
 
+<%
 
+String message = "";
+
+GenericService<User, User> service = new GenericServiceImpl<>();
+
+String username = request.getParameter("username") != null ? request.getParameter("username") : "";
+String password = request.getParameter("password") != null ? request.getParameter("password") : "";
+
+int resp = -2;
+User user = null;
+
+
+String action = request.getParameter("action") != null ? request.getParameter("action") : "";
+
+if(action.equalsIgnoreCase("login")) {
+	if(!username.equals("") && !password.equals("")) {
+		
+		List<User> users = service.findAllByQuery(Query.queryUserByUsernameAndPassword, User.class, username, password); 
+		
+		if(users != null && !users.isEmpty()) {
+			user = users.get(0);
+			session.setAttribute("sessionid", username);
+			response.sendRedirect("index.jsp");
+		} else {
+
+resp = -1;
+message = "Username or password invalid. Please enter a valid username and password!";
+		}
+		
+	}
+}
+
+
+
+
+%>
+	
 	<div
 		class="position-absolute h-60 top-50 start-50 translate-middle shadow-sm p-5 mb-5 bg-body rounded"
 		style="width: 35vw">
 		<h2 class="w-100 text-center pb-4">Sign In</h2>
-		<form>
+		<form action="login.jsp">
+		
+		<%
+if (resp == -1 ) {
+%>
+<div class="alert alert-warning alert-dismissible fade show"
+	role="alert">
+	<strong>Osp...!</strong>  <%= message %>.
+	<button type="button" onclick="javascript:window.location='login.jsp'"
+		class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+<%
+}
+%>
 			<!-- Username input -->
-			<div class="form-outline mb-4">
-				<input type="email" id="form2Example1" class="form-control" /> <label
-					class="form-label" for="form2Example1">Username</label>
+			<div class="form-floating mb-3">
+				<input type="text" id="username" name="username" placeholder="username" class="form-control" /> <label
+					class="form-label" for="username">Username</label>
 			</div>
 
 			<!-- Password input -->
-			<div class="form-outline mb-4">
-				<input type="password" id="form2Example2" class="form-control" /> <label
-					class="form-label" for="form2Example2">Password</label>
+			<div class="form-floating mb-3">
+				<input type="password" id="password" name="password" placeholder="password" class="form-control" /> <label
+					class="form-label" for="password">Password</label>
 			</div>
 
 			<div class="d-flex">
 				<div class="flex-grow-1">
-					<button type="button" class="btn btn-brwn mb-4">Sign in</button>
-				</div>
-
-				<div class="text-center">
-					<p>
-						Not a member? <a href="#!" class="link-brwn">Register</a>
-					</p>
+					<input type="hidden" name="action" value="login">
+					<button type="submit" class="btn btn-brwn mb-4 w-100">Sign in</button>
 				</div>
 			</div>
 		</form>
 	</div>
+
 
 	<script
 		src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"

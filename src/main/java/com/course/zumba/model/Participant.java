@@ -1,19 +1,22 @@
 package com.course.zumba.model;
 
-public class Participant {
+import java.io.Serializable;
+
+public class Participant implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
+
 	private Integer id;
 	
 	private String name;
 	
-	private Integer age;
+	private String contact;
 	
 	private String email;
-	
+
 	public Integer getId() {
 		return id;
 	}
-
 
 	public void setId(Integer id) {
 		this.id = id;
@@ -23,18 +26,16 @@ public class Participant {
 		return name;
 	}
 
-
 	public void setName(String name) {
 		this.name = name;
 	}
 
-
-	public Integer getAge() {
-		return age;
+	public String getContact() {
+		return contact;
 	}
 
-	public void setAge(Integer age) {
-		this.age = age;
+	public void setContact(String contact) {
+		this.contact = contact;
 	}
 
 	public String getEmail() {
@@ -45,10 +46,8 @@ public class Participant {
 		this.email = email;
 	}
 
-
 	@Override
 	public String toString() {
-		return "Participant [id=" + getId() +", name=" + name + ", age=" + age + ", email=" + email + "]";
+		return "Participant [id=" + id + ", name=" + name + ", contact=" + contact + ", email=" + email + "]";
 	}
-	
 }

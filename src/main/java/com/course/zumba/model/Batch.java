@@ -1,35 +1,39 @@
 package com.course.zumba.model;
 
-public class Batch {
+import java.io.Serializable;
+
+public class Batch  implements Serializable{
 	
+	private static final long serialVersionUID = 1L;
+
 	private Integer id;
 	
 	private String name;
 	
-	private Integer totaalParticipants;
-
+	private String  instructor;
+	
 	public Integer getId() {
 		return id;
 	}
-
 	public void setId(Integer id) {
 		this.id = id;
 	}
-
 	public String getName() {
 		return name;
 	}
-
 	public void setName(String name) {
 		this.name = name;
 	}
-
-	public Integer getTotaalParticipants() {
-		return totaalParticipants;
+	public String getInstructor() {
+		return instructor;
 	}
-
-	public void setTotaalParticipants(Integer totaalParticipants) {
-		this.totaalParticipants = totaalParticipants;
+	public void setInstructor(String instructor) {
+		this.instructor = instructor;
+	}
+	
+	@Override
+	public String toString() {
+		return "Batch [id=" + id + ", name=" + name + ", instructor=" + instructor + "]";
 	}
 	
 }

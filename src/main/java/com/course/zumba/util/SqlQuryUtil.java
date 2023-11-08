@@ -18,7 +18,6 @@ public class SqlQuryUtil {
 
 	public static void setPreparedStatementValue(Map<Integer, Object> statement, PreparedStatement preparedStatement) throws SQLException {
 		for (Map.Entry<Integer, Object> statementValue : statement.entrySet()){
-			System.out.println("key: " + statementValue.getKey() + " - value: " + statementValue.getValue());
 			preparedStatement.setObject(statementValue.getKey(), statementValue.getValue());
 		}
 	}
@@ -31,15 +30,13 @@ public class SqlQuryUtil {
 				continue;
 			}
 			
-			System.out.println("Checking next statement 1");
 			if(operation.equalsIgnoreCase("insert") ) {
 				preperColumnForInsertion(i, sql, element, methods, statement);
 				continue;
 			}
-		
-			System.out.println("Checking next statement 2");
-			
 		}
+		
+		reorderPosition = -1;
 	}
 	
 
@@ -56,7 +53,7 @@ public class SqlQuryUtil {
 	private static void preperColumnForUpdate(int index, StringBuilder sql, Object element, List<Method> methods, Map<Integer, Object> statement)
 			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 
-		if (methods.get(index).getName().contains("Id")) {
+		if (methods.get(index).getName().contains("getId")) {
 			int lastPosition = methods.size();
 			statement.put(lastPosition, methods.get(index).invoke(element, null));
 			reorderPosition = (index + 1);

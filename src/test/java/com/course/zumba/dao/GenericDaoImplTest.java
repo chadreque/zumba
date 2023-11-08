@@ -19,22 +19,22 @@ public class GenericDaoImplTest {
 		
 		try {
 			Participant participant = new Participant();
-			participant.setName("Maria Moises Tebete Micajo");
-			participant.setAge(24);
-			participant.setEmail("maria.t.micajogmail.com");
+			participant.setName("Testando");
+			participant.setContact("646084589");
+			participant.setEmail("teste@gmail.com");
 
-			GenericDaoImpl<Participant> daodaoParticipant = new GenericDaoImpl<Participant>();
+			GenericDaoImpl<Participant, Void> daodaoParticipant = new GenericDaoImpl<Participant, Void>();
 			int participantID = daodaoParticipant.insert(participant); 
 		
-			Batch batch = new Batch();
-			batch.setName("Zumba 4");
-			batch.setTotaalParticipants(10);
+//			Batch batch = new Batch();
+//			batch.setName("Zumba 4");
+//			batch.setTotaalParticipants(10);
+//			
+//			GenericDaoImpl<Batch> daoBatch = new GenericDaoImpl<Batch>();
 			
-			GenericDaoImpl<Batch> daoBatch = new GenericDaoImpl<Batch>();
+//			int batchID = daoBatch.insert(batch); 
 			
-			int batchID = daoBatch.insert(batch); 
-			
-//			assertTrue(id > 0); 
+			assertTrue(participantID > 0); 
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -49,10 +49,10 @@ public class GenericDaoImplTest {
 			Participant participant = new Participant();
 			participant.setId(9);
 			participant.setName("Maria Moises Tebete Micajo");
-			participant.setAge(24);
+			participant.setContact("846084589");
 			participant.setEmail("maria.t.micajogmail.com");
 
-			GenericDao<Participant> dao = new GenericDaoImpl<Participant>();
+			GenericDao<Participant, Void> dao = new GenericDaoImpl<Participant, Void>();
 			int id = dao.update(participant); 
 			
 		} catch (Exception e) {
@@ -62,11 +62,11 @@ public class GenericDaoImplTest {
 	}
 
 	
-	@Test
+//	@Test
 	public void testSelectAll() {
-		GenericDao<Participant> dao;
+		GenericDao<Participant, Void> dao;
 		try {
-			dao = new GenericDaoImpl<Participant>();
+			dao = new GenericDaoImpl<Participant, Void>();
 			List<Participant> participants = dao.findAll(Participant.class);
 			
 			participants.stream().forEach(p -> System.out.println("Participant: " + p));
@@ -78,12 +78,28 @@ public class GenericDaoImplTest {
 		
 	}
 	
+	@Test
+	public void testFindAllByQuery() {
+		GenericDao<Participant, Participant> dao;
+		String query = "select distinct p.* from participant p where p.name = ?";
+		try {
+			dao = new GenericDaoImpl<Participant, Participant>();
+			List<Participant> batchs = dao.findAllByQuery(query, Participant.class, "safdsf34we");
+			
+			batchs.stream().forEach(b -> System.out.println("Batch: " + b));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		
+	}
+	
 //	@Test
 	public void testSelectById() {
-		GenericDaoImpl<Participant> dao;
+		GenericDaoImpl<Participant, Void> dao;
 		try {
-			dao = new GenericDaoImpl<Participant>();
-			Participant participants = dao.findById(8, Participant.class);
+			dao = new GenericDaoImpl<Participant, Void>();
+			Participant participants = dao.findById(21, Participant.class);
 			
 			System.out.println("Participant: " + participants);
 		} catch (Exception e) {
@@ -93,9 +109,9 @@ public class GenericDaoImplTest {
 	
 //	@Test
 	public void testDelete() {
-		GenericDaoImpl<Participant> dao;
+		GenericDaoImpl<Participant, Void> dao;
 		try {
-			dao = new GenericDaoImpl<Participant>();
+			dao = new GenericDaoImpl<Participant, Void>();
 			int deleted = dao.deleteById(10, Participant.class);
 			
 			System.out.println("deleted id: " + deleted);

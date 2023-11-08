@@ -7,12 +7,13 @@ import java.util.List;
 
 import com.course.zumba.dao.GenericDao;
 import com.course.zumba.dao.GenericDaoImpl;
+import com.course.zumba.model.Batch;
 
-public class GenericServiceImpl<T> implements GenericService<T> {
-	private GenericDao<T> dao;
+public class GenericServiceImpl<T, V> implements GenericService<T, V> {
+	private GenericDao<T, V> dao;
 
 	public GenericServiceImpl() throws ClassNotFoundException, SQLException {
-			dao = new GenericDaoImpl<T>();
+		dao = new GenericDaoImpl<T, V>();
 	}
 
 	@Override
@@ -22,7 +23,7 @@ public class GenericServiceImpl<T> implements GenericService<T> {
 		} catch (IllegalAccessException | InvocationTargetException | SQLException e) {
 			e.printStackTrace();
 		}
-		
+
 		return -1;
 	}
 
@@ -33,20 +34,33 @@ public class GenericServiceImpl<T> implements GenericService<T> {
 		} catch (IllegalAccessException | InvocationTargetException | SQLException e) {
 			e.printStackTrace();
 		}
-		
+
 		return -1;
 	}
 
 	@Override
 	public List<T> findAll(Class<T> classElement) {
 		try {
-			return dao.findAll(classElement);
+			List<T> list = dao.findAll(classElement);
+			list.stream().forEach(al -> System.out.println("el: " + al.toString()));
+			return list;
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException
 				| SecurityException | IllegalArgumentException | InvocationTargetException | SQLException e) {
 			e.printStackTrace();
 		}
-		
+
 		return new ArrayList<>();
+	}
+
+	public List<V> findAllByQuery(String query, Class<V> returnClass, Object... statementParams) {
+		try {
+			return dao.findAllByQuery(query, returnClass, statementParams);
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+				| SQLException e) {
+			e.printStackTrace();
+		}
+
+		return null;
 	}
 
 	@Override
@@ -57,7 +71,7 @@ public class GenericServiceImpl<T> implements GenericService<T> {
 				| SQLException e) {
 			e.printStackTrace();
 		}
-		
+
 		return null;
 	}
 
@@ -68,9 +82,19 @@ public class GenericServiceImpl<T> implements GenericService<T> {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		
+
 		return -1;
 	}
-	
-	
+
+	@Override
+	public int deleteByPramCondition(Class<T> classElement, String [] params, Object... valueParams) {
+		try {
+			return dao.deleteByPramCondition(classElement, params, valueParams);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return -1;
+	}
+
 }

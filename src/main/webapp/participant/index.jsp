@@ -11,21 +11,26 @@
 <%@page import="com.course.zumba.dao.*"%>
 
 <%
-GenericService<Batch, Void> service = new GenericServiceImpl<>();
+GenericService<Participant, Batch> service = new GenericServiceImpl<>();
+GenericService<Batch, Void> serviceBatch = new GenericServiceImpl<>();
 GenericService<BatchParticipant, Void> serviceBP = new GenericServiceImpl<>();
 
-// List<Batch> batchs = new ArrayList<Batch>();
+GenericService<Participant, Participant> serviceID = new GenericServiceImpl<>();
+
+List<Participant> participants = new ArrayList<Participant>();
 List<Batch> batchs = new ArrayList<Batch>();
+List<Batch> pBatchs =  new ArrayList<Batch>();
 
-batchs = service.findAll(Batch.class); 
-// batchs = serviceBatch.findAll(Batch.class);
+List<Integer> pbatchIds =  new ArrayList<>();
 
+participants = service.findAll(Participant.class); 
+batchs = serviceBatch.findAll(Batch.class);
 
-Batch b = null;
+Participant p = null;
 
 int id = 0;
 int idx = 0;
-int resp  = -1;
+int resp  = -2;
 
 String action = request.getParameter("action") != null ? request.getParameter("action") : "";
 String actionMessage = request.getParameter("actionMessage") != null ? request.getParameter("actionMessage") : "";
@@ -36,20 +41,26 @@ if(request.getParameter("action-respo") != null)
 
 if(action.equalsIgnoreCase("edit")) {
 	id = Integer.parseInt(request.getParameter("id"));
-	b = service.findById(id, Batch.class);
+	p = service.findById(id, Participant.class);
+	
+	pBatchs = service.findAllByQuery(Query.findAllBatchParticipantByParticipant, Batch.class, id);	
+	
+	for(Batch bt: pBatchs) {
+		pbatchIds.add(bt.getId());
+	}
 }
 	
 if(action.equalsIgnoreCase("yesDelete")) {
 	
 	id = Integer.parseInt(request.getParameter("id"));
 	
-	String [] condition = {"bid"};
+	String [] condition = {"pid"};
 	
 	serviceBP.deleteByPramCondition(BatchParticipant.class, condition, id);
 	
 	actionMessage = "deleted";
 	
-	resp = service.deleteById(id, Batch.class);
+	resp = service.deleteById(id, Participant.class);
 	
 	response.sendRedirect("index.jsp?action-respo=" + resp + "&actionMessage=" + actionMessage);
 }
@@ -58,23 +69,40 @@ if(action.equalsIgnoreCase("delete")) {
 	
 	id = Integer.parseInt(request.getParameter("id"));
 	
-	b = service.findById(id, Batch.class);
+	p = service.findById(id, Participant.class);
 }
 
 if(action.equalsIgnoreCase("insert")) {
-	b = new Batch();
+	p = new Participant();
 	
 	actionMessage = "saved";
 	
 
 	String name = request.getParameter("addName");
-	String instructor = request.getParameter("addInstructor");
+	String email = request.getParameter("addEmail");
+	String contact = request.getParameter("addContact");
 
-	b.setName(name);
-	b.setInstructor(instructor);
+	p.setName(name);
+	p.setEmail(email);
+	p.setContact(contact);
 	
-	resp = service.insert(b);
+	String [] selected = request.getParameterValues("selected");
+	
+	resp = service.insert(p);
 
+	List<Participant> participantSaved = serviceID.findAllByQuery(Query.queryParticpantNameAndEmail, Participant.class, name, email);
+	
+	if(resp != -1 && selected != null) {
+		for(String bid : selected) {
+			BatchParticipant bp = new BatchParticipant();
+			bp.setPid(participantSaved.get(0).getId());
+			
+			bp.setBid(Integer.valueOf(bid));
+	
+			resp = serviceBP.insert(bp);
+		}
+	}
+	
 	response.sendRedirect("index.jsp?action-respo=" + resp + "&actionMessage=" + actionMessage);
 }
 
@@ -85,19 +113,65 @@ if (action.equalsIgnoreCase("update")) {
 	
 	service = new GenericServiceImpl<>();
 	id = Integer.parseInt(request.getParameter("id"));
-	b = service.findById(id, Batch.class);
+	p = service.findById(id, Participant.class);
 
 	String name = request.getParameter("editName");
-	String instructor = request.getParameter("editInstructor");
+	String email = request.getParameter("editEmail");
+	String contact = request.getParameter("editContact");
 
-	if (!b.getName().equalsIgnoreCase(name))
-		b.setName(name);
+	if (!p.getName().equalsIgnoreCase(name))
+		p.setName(name);
 
-	if (!b.getInstructor().equalsIgnoreCase(instructor))
-		b.setInstructor(instructor);
+	if (!p.getEmail().equalsIgnoreCase(email))
+		p.setEmail(email);
+
+	if (!p.getContact().toString().equalsIgnoreCase(contact))
+		p.setContact(contact);
+
+	String [] selected = request.getParameterValues("batchSelected");
 	
+
+	pBatchs = service.findAllByQuery(Query.findAllBatchParticipantByParticipant, Batch.class, id);	
 	
-	resp = service.update(b);
+	for(Batch bt: pBatchs) {
+		pbatchIds.add(bt.getId());
+	}
+	
+	List<Integer> containedIDs = new ArrayList<>();
+	
+	if(selected != null) {
+		for(int i = 0; i < selected.length; i++) {
+			if(!pbatchIds.contains(selected[i])) {
+				BatchParticipant bp = new BatchParticipant();
+				
+				bp.setPid(p.getId());
+				bp.setBid(Integer.valueOf(selected[i]));
+		
+				serviceBP.insert(bp);
+			}
+			
+			if(pbatchIds.contains(Integer.valueOf(selected[i]))) {
+				out.println("contain id: " + selected[i]);
+				containedIDs.add(Integer.valueOf(selected[i]));
+			}	
+		}
+	}
+	
+	for(Integer cid : containedIDs) {
+		pbatchIds.remove(cid);
+	}
+	
+	String [] condition = {"bid", "pid"};
+
+	
+	if(pbatchIds.size() != 0) {
+		for(Integer cid : pbatchIds) {
+			serviceBP.deleteByPramCondition(BatchParticipant.class, condition, Integer.valueOf(cid), p.getId());
+		}
+	}
+	
+	pbatchIds = new ArrayList<>();
+	resp = service.update(p);
 	response.sendRedirect("index.jsp?action-respo=" + resp + "&actionMessage=" + actionMessage);
 }
 %>

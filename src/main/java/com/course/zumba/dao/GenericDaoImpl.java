@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 import com.course.zumba.util.Database;
 import com.course.zumba.util.SqlQuryUtil;
 
-public class GenericDaoImpl<T> implements GenericDao<T> {
+public class GenericDaoImpl<T, V> implements GenericDao<T, V> {
 
 	private PreparedStatement preparedStatement;
 	private Map<Integer, Object> statement;
@@ -24,7 +24,7 @@ public class GenericDaoImpl<T> implements GenericDao<T> {
 	private Connection connection;
 
 	public GenericDaoImpl() throws ClassNotFoundException, SQLException {
-//		connection = Database.connect();
+		connection = Database.connect();
 		statement = new HashMap<Integer, Object>();
 
 	}
@@ -76,6 +76,7 @@ public class GenericDaoImpl<T> implements GenericDao<T> {
 		return preparedStatement.executeUpdate();
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public List<T> findAll(Class<T> classElement)
 			throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException,
@@ -108,7 +109,41 @@ public class GenericDaoImpl<T> implements GenericDao<T> {
 
 		return list;
 	}
+	
 
+	@Override
+	@SuppressWarnings("deprecation")
+	public List<V> findAllByQuery(String query, Class<V> returnClass, Object... statementParams) throws SQLException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		List<V> list = new ArrayList<>();
+		
+		preparedStatement = connection.prepareStatement(query);
+		
+		for(int i = 0; i < statementParams.length; i++) 
+			preparedStatement.setObject(i+1, statementParams[i]);
+		
+		System.out.println("preparedStatement: " + preparedStatement);
+
+		ResultSet resultSet = preparedStatement.executeQuery();
+
+		List<Method> methods = Arrays.asList(returnClass.getDeclaredMethods()).stream()
+				.filter(method -> method.getName().contains("set")).collect(Collectors.toList());
+
+		while (resultSet.next()) {
+			V instance = (V) returnClass.newInstance();
+
+			for (Method method : methods) {
+				Object value = resultSet.getObject(method.getName().substring(3).toLowerCase());
+				method.invoke(instance, value);
+			}
+
+			list.add(instance);
+		}
+
+		
+		return list;
+	}
+
+	@SuppressWarnings("deprecation")
 	@Override
 	public T findById(int id, Class<T> classElement) throws SQLException, IllegalAccessException,
 			IllegalArgumentException, InvocationTargetException, InstantiationException {
@@ -150,4 +185,31 @@ public class GenericDaoImpl<T> implements GenericDao<T> {
 
 		return preparedStatement.executeUpdate();
 	}
+	
+
+	@Override
+	public int deleteByPramCondition(Class<T> classElement, String [] params, Object... valueParams) throws SQLException {
+		StringBuilder sql = new StringBuilder("DELETE FROM ").append(classElement.getSimpleName())
+				.append(" where ");
+				
+		for(int i = 0; i < params.length; i++)  {
+			sql.append(params[i])
+			.append( (i + 1) >= params.length ?  " = ? " : " = ? and ");	
+		}
+
+		preparedStatement = connection.prepareStatement(sql.toString());
+
+		System.out.println("<<valueParams.length>> : " + valueParams.length);
+		
+		System.out.println("<<valueParams[0]>> : " + valueParams[0]);
+		
+		System.out.println("<<preparedStatement>> : " + preparedStatement);
+		
+		
+		for(int i = 0; i < valueParams.length; i++) 
+			preparedStatement.setObject((i + 1), valueParams[i]);
+
+		return preparedStatement.executeUpdate();
+	}
+
 }
