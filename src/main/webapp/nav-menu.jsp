@@ -7,6 +7,8 @@ String actionNav = request.getParameter("action") != null ? request.getParameter
 
 String user = (String) session.getAttribute("sessionid");
 
+if(user == null) response.sendRedirect("/ZUMBA/login.jsp");
+
 if(actionNav.equalsIgnoreCase("logout")) {
 	response.sendRedirect("/ZUMBA/login.jsp");
 }
