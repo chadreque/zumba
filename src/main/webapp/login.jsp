@@ -46,6 +46,7 @@
 <%
 
 String message = "";
+String toRemove = "";
 
 GenericService<User, User> service = new GenericServiceImpl<>();
 

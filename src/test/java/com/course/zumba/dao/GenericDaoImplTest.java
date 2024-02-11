@@ -69,7 +69,7 @@ public class GenericDaoImplTest {
 			dao = new GenericDaoImpl<Participant, Void>();
 			List<Participant> participants = dao.findAll(Participant.class);
 			
-			participants.stream().forEach(p -> System.out.println("Participant: " + p));
+//			participants.stream().forEach(p -> System.out.println("Participant: " + p));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 //			e.printStackTrace();
@@ -86,7 +86,7 @@ public class GenericDaoImplTest {
 			dao = new GenericDaoImpl<Participant, Participant>();
 			List<Participant> batchs = dao.findAllByQuery(query, Participant.class, "safdsf34we");
 			
-			batchs.stream().forEach(b -> System.out.println("Batch: " + b));
+//			batchs.stream().forEach(b -> System.out.println("Batch: " + b));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
